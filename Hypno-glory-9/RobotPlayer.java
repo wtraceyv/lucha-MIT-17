@@ -1,10 +1,9 @@
 // start Eclipse project, name package this folder name for now
-
 package Hypno-glory-9
 
 import Battlecode.common.*; 
 
-public class RobotPlayer extends Globals { // find out why the Globals and where it comes from? 
+public class RobotPlayer extends Init { 
     
     /** 
      * this run method required? 
