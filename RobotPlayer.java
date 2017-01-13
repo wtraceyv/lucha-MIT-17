@@ -26,6 +26,7 @@ public class RobotPlayer {
                 Gardener.go();
                 break;
             case SOLDIER:
+            	SoldierBot.go();
                 break;
             case LUMBERJACK:
                 break;
