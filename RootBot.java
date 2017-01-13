@@ -3,12 +3,10 @@ package bc10Night;
 import battlecode.common.*; 
 
 /**
- * seems to work WAY better when it's not getting in the way!
- * -work on confirming the other classes see this stuff-->
- * like, periodically have an archon print its "here" to 
- * make sure it knows and it's updating 
+ * update works fine without exceptions now 
+ * -maybe cut out direction
  * -work on methods that detect urgent threats and 
- * take care of them (unless archon/gardener..figure that out)
+ * take care of them (unless archon/gardener..need escape sequence)
  * @author Wallisan
  *
  */
@@ -16,23 +14,35 @@ import battlecode.common.*;
 public class RootBot {
 	
 	public static RobotController rc = RobotPlayer.rc; 
-	public static RobotType me; 
+	public static RobotType me = rc.getType(); 
 	public static MapLocation here = rc.getLocation(); 
 	public static Direction facing; 
-	public static int round; 
+	public static int round = rc.getRoundNum(); 
 	
-	public static Team allies; 
-	public static Team enemies; 
-	public static MapLocation[] initAllyArchonLocs; 
-	public static MapLocation[] initEnemyArchonLocs; 
-	
-	public static RobotInfo[] closeAllies; 
-	public static RobotInfo[] closeEnemies; 
-	public static RobotInfo[] urgentEnemies;
+	public static Team allies = rc.getTeam(); 
+	public static Team enemies = allies.opponent(); 
+	public static MapLocation[] initAllyArchons = rc.getInitialArchonLocations(allies); 
+	public static MapLocation[] initEnemyArchons = rc.getInitialArchonLocations(enemies);
 	
 	/**
-	 * redo all this stuff! 
-	 * make a good base structure for all the 
-	 * other robots!
+	 * use methods (?) to look at these surroundings, 
+	 * put findings in update() so bots can use them
+	 * in their go()-->while method. 
+	 * Include trees locations for Gardeners and such. 
 	 */
+	public static RobotInfo[] closeAllies = rc.senseNearbyRobots(me.sensorRadius,allies); 
+	public static RobotInfo[] closeEnemies = rc.senseNearbyRobots(me.sensorRadius,enemies); 
+	public static RobotInfo[] urgentEnemies = rc.senseNearbyRobots(me.sensorRadius/2,enemies);
+	public static TreeInfo[] closeTrees = rc.senseNearbyTrees();
+	
+	public static void update(){
+		here = rc.getLocation();
+		round = rc.getRoundNum();
+		closeAllies = rc.senseNearbyRobots(me.sensorRadius,allies);
+		closeEnemies = rc.senseNearbyRobots(me.sensorRadius,enemies);
+		urgentEnemies = rc.senseNearbyRobots(me.sensorRadius/2,enemies);
+		closeTrees = rc.senseNearbyTrees();
+	}
+	
+	
 }// end class RootBot
