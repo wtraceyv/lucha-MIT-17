@@ -2,6 +2,12 @@ package bc10Night;
 
 import battlecode.common.*;
 
+/**
+ * holds methods for directed movement/pathing
+ * 
+ * @author Wallisan
+ */
+
 public class Nav extends RootBot {
 	
 	static Direction randomDirection() {
@@ -36,7 +42,6 @@ public class Nav extends RootBot {
         }
 
         // Now try a bunch of similar angles
-        boolean moved = false;
         int currentCheck = 1;
 
         while(currentCheck<=checksPerSide) {
@@ -59,48 +64,79 @@ public class Nav extends RootBot {
     }
 	
 	/**
-	 * navigate in some direction
-	 * -MINE
-	 */
-	public static boolean tryMoveWalter(Direction dir) throws GameActionException{
-		Direction right = dir.rotateLeftDegrees(40);  
-		Direction left = dir.rotateLeftDegrees(40); 
-		if (rc.canMove(dir)){
-			rc.move(dir); 
-			return true; 
-		}
-		if (rc.canMove(left)){
-			rc.move(left); 
-			return true; 
-		}
-		if (rc.canMove(right)){
-			rc.move(right); 
-			return true; 
-		}
-		return false; 
-	}
-	
-	public static boolean toTree(){
-		return false; 
-	}
-	/**
 	 * simple attempt to make it to a destination, 
 	 * perhaps later use A*?
 	 * 
 	 * @param target
 	 * 
-	 * -MINE?
+	 * doesn't really return correctly -- get more in depth here. 
 	 */
 	public static boolean goTo(MapLocation target) throws GameActionException {
-		if (here.equals(target))
+		if (here.isWithinDistance(target, me.sensorRadius))
 			return false; 
 		Direction forward = here.directionTo(target); 
-		MapLocation front = here.add(forward); // why? 
+		//MapLocation front = here.add(forward); // why? 
 		if (rc.canMove(forward)){
 			rc.move(forward); 
-			return true; 
 		}
-		
+		else if (closeTrees.length > 0 && !(me==RobotType.SCOUT)){
+			Direction[] paths; 
+			if (leftPrefer(target)){
+				paths = new Direction[] {forward, forward.rotateLeftDegrees(90), forward.rotateRightDegrees(90)};
+			}
+			else 
+				paths = new Direction[] {forward, forward.rotateRightDegrees(90), forward.rotateLeftDegrees(90)};
+			for (int i = 0; i++<paths.length;){
+				if (rc.canMove(paths[i])){
+					rc.move(paths[i]);
+					return true; 
+				}
+			}
+		}
 		return false; 
 	}
-}
+	
+	public static boolean leftPrefer(MapLocation target){
+		Direction targetDir = here.directionTo(target); 
+		MapLocation leftChoice = here.add(targetDir.rotateLeftDegrees(90)); 
+		MapLocation rightChoice = here.add(targetDir.rotateRightDegrees(90)); 
+		return (target.distanceTo(leftChoice) < target.distanceTo(rightChoice)); 
+	}
+	/**
+	 * basic dodge-a-bullet deal 
+	 * @return false if failed dodge
+	 */
+	public static boolean simpleDodge(){
+		return false; 
+	}
+	
+	/**
+	 * try to maintain a certain fixed distance while doing 
+	 * anything--particularly fighting; don't just get close 
+	 * and stop, keep distance and ability to dodge
+	 * 
+	 * @param distance
+	 * @return false if movement fails 
+	 */
+	public static boolean maintainDistance(RobotInfo bot, float distance) throws GameActionException{
+		Direction negativeDir = new Direction(here,bot.getLocation()); 
+		float leftRightOffset = 150; 
+		Direction[] retreatDirs = {negativeDir.rotateLeftDegrees(leftRightOffset), negativeDir.rotateLeftDegrees(180), negativeDir.rotateRightDegrees(leftRightOffset)};
+		boolean hasMoved = false; 
+		
+		while (here.isWithinDistance(bot.getLocation(), distance)){
+			for (Direction dir : retreatDirs){
+				if (rc.canMove(dir)){
+					rc.move(dir);
+					hasMoved = true; 
+					return true; 
+				}
+			}
+			if (!hasMoved){
+				leftRightOffset -= 20;  
+			}
+		}
+		return false; 
+	}
+	
+}// end Nav class 
