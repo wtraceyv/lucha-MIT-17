@@ -28,6 +28,9 @@ public class RobotPlayer {
             case SOLDIER:
             	SoldierBot.go();
                 break;
+            case SCOUT: 
+            	ScoutBot.go();
+            	break; 
             case LUMBERJACK:
                 break;
             default: 
@@ -36,3 +39,4 @@ public class RobotPlayer {
         }
 	}
 }// end RobotPlayer class
+
