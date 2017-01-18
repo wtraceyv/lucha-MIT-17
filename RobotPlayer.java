@@ -17,7 +17,7 @@ public class RobotPlayer {
     public static void run(RobotController rc) throws GameActionException {
 
         RobotPlayer.rc = rc;
-        
+        // runs corresponding file for robot type
         switch (rc.getType()) {
             case ARCHON:
                 ArchonBot.go();  
