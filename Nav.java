@@ -21,7 +21,7 @@ public class Nav extends RootBot {
      * @throws GameActionException
      */
     static boolean tryMove(Direction dir) throws GameActionException {
-        return tryMove(dir,20,3);
+        return tryMove(dir,45,3);
     }
 
     /**
@@ -64,8 +64,7 @@ public class Nav extends RootBot {
     }
 	
 	/**
-	 * simple attempt to make it to a destination, 
-	 * perhaps later use A*?
+	 * simple attempt to make it to a destination
 	 * 
 	 * @param target
 	 * 
@@ -74,39 +73,15 @@ public class Nav extends RootBot {
 	public static boolean goTo(MapLocation target) throws GameActionException {
 		if (here.isWithinDistance(target, me.sensorRadius))
 			return false; 
-		Direction forward = here.directionTo(target); 
-		//MapLocation front = here.add(forward); // why? 
-		if (rc.canMove(forward)){
-			rc.move(forward); 
-		}
-		else if (closeTrees.length > 0 && !(me==RobotType.SCOUT)){
-			Direction[] paths; 
-			if (leftPrefer(target)){
-				paths = new Direction[] {forward, forward.rotateLeftDegrees(90), forward.rotateRightDegrees(90)};
-			}
-			else 
-				paths = new Direction[] {forward, forward.rotateRightDegrees(90), forward.rotateLeftDegrees(90)};
-			for (int i = 0; i++<paths.length;){
-				if (rc.canMove(paths[i])){
-					rc.move(paths[i]);
-					return true; 
-				}
-			}
-		}
-		return false; 
+		Direction forward = here.directionTo(target);
+		return tryMove(forward, 45, 3); 
 	}
 	
-	public static boolean leftPrefer(MapLocation target){
-		Direction targetDir = here.directionTo(target); 
-		MapLocation leftChoice = here.add(targetDir.rotateLeftDegrees(90)); 
-		MapLocation rightChoice = here.add(targetDir.rotateRightDegrees(90)); 
-		return (target.distanceTo(leftChoice) < target.distanceTo(rightChoice)); 
-	}
 	/**
 	 * basic dodge-a-bullet deal 
 	 * @return false if failed dodge
 	 */
-	public static boolean simpleDodge(){
+	public static boolean dodge(){
 		return false; 
 	}
 	
@@ -118,22 +93,16 @@ public class Nav extends RootBot {
 	 * @param distance
 	 * @return false if movement fails 
 	 */
-	public static boolean maintainDistance(RobotInfo bot, float distance) throws GameActionException{
-		Direction negativeDir = new Direction(here,bot.getLocation()); 
-		float leftRightOffset = 150; 
-		Direction[] retreatDirs = {negativeDir.rotateLeftDegrees(leftRightOffset), negativeDir.rotateLeftDegrees(180), negativeDir.rotateRightDegrees(leftRightOffset)};
-		boolean hasMoved = false; 
-		
-		while (here.isWithinDistance(bot.getLocation(), distance)){
-			for (Direction dir : retreatDirs){
-				if (rc.canMove(dir)){
-					rc.move(dir);
-					hasMoved = true; 
-					return true; 
+	public static boolean avoidLumberjack() throws GameActionException{
+		RobotInfo toAvoid; 
+		for (RobotInfo enemy : closeEnemies){
+			if (enemy.getType()==RobotType.LUMBERJACK){
+				toAvoid = enemy; 
+				Direction retreatDir = toAvoid.getLocation().directionTo(here); 
+				float distance = here.distanceTo(enemy.getLocation()); 
+				if (distance <= GameConstants.LUMBERJACK_STRIKE_RADIUS && Nav.tryMove(retreatDir, 45, 3)){
+					return true;  
 				}
-			}
-			if (!hasMoved){
-				leftRightOffset -= 20;  
 			}
 		}
 		return false; 
