@@ -107,5 +107,13 @@ public class Nav extends RootBot {
 		}
 		return false; 
 	}
-	
+	public static void screensaver(){
+		Direction initailDirection = randomDirection();
+		if(rc.canMove(initialDirection)){
+			rc.move(initialDirection);
+		}
+		else{
+			trymove(initialDirection.rotateRightDegrees(90));
+		}
+	}
 }// end Nav class 
