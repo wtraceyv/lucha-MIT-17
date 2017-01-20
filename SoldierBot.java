@@ -18,8 +18,7 @@ public class SoldierBot extends RootBot{
 		while(true){
 			update(); 
 			try{
-				while (!here.isWithinDistance(centerInitEnemyArchons, (float)(me.sensorRadius*.75)))
-					Nav.goTo(centerInitEnemyArchons); 
+				execute(); 
 			}
 			catch(Exception e){
 				e.printStackTrace();
@@ -30,10 +29,6 @@ public class SoldierBot extends RootBot{
 	public static void execute() throws GameActionException {
 		if (tryAttack())
 			return; 
-		else if (closeEnemies.length>0){
-			if (tryAttack())
-				return; 
-		}
 		else {
 			Nav.goTo(centerInitAllyArchons); 
 			return; 
@@ -46,15 +41,12 @@ public class SoldierBot extends RootBot{
 	 * @throws GameActionException
 	 */
 	public static boolean tryAttack() throws GameActionException {
-		if (closeEnemies.length>2){
-			for (RobotInfo bot : closeEnemies){
-				while (bot.getHealth()>0){
-					Nav.maintainDistance(bot, (float) (me.sensorRadius*.75)); 
-					Direction target = here.directionTo(bot.getLocation()); 
-					rc.fireSingleShot(target);
-				}
-			}
+		for (RobotInfo bot : closeEnemies){
+			Direction target = here.directionTo(bot.getLocation()); 
+			rc.fireSingleShot(target);
+			Nav.goTo(bot.getLocation()); 
 		}
 		return false; 
 	}
 }// end SoldierBot class 
+
