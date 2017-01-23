@@ -100,16 +100,4 @@ public class ScoutBot extends RootBot{
 		Nav.goTo(enemy.getLocation());
 	}
 
-	/**
-	 * fire at soldier, but maintain a certain distance so
-	 * it's a little harder to swarm US with soldiers
-	 * @param enemy
-	 * @throws GameActionException
-	 */
-	public static void swarmSoldier(RobotInfo enemy) throws GameActionException {
-		Direction target = here.directionTo(enemy.getLocation());
-		if (rc.canFireSingleShot() && !Nav.avoidLumberjack()){
-			rc.fireSingleShot(target);
-		}
-	}
-}
+}// end ScoutBot class 
