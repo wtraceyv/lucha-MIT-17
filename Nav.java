@@ -10,8 +10,12 @@ import battlecode.common.*;
 
 public class Nav extends RootBot {
 	
-	static Direction randomDirection() {
-        return new Direction((float)Math.random() * 2 * (float)Math.PI);
+    /**
+     * grab a random direction, mostly for testing 
+     * or last resorts. 
+     */
+    static Direction randomDirection() {
+    	return new Direction((float)Math.random() * 2 * (float)Math.PI);
     }
 	/**
      * Attempts to move in a given direction, while avoiding small obstacles directly in the path.
@@ -107,13 +111,5 @@ public class Nav extends RootBot {
 		}
 		return false; 
 	}
-	public static void screensaver(){
-		Direction initailDirection = randomDirection();
-		if(rc.canMove(initialDirection)){
-			rc.move(initialDirection);
-		}
-		else{
-			trymove(initialDirection.rotateRightDegrees(90));
-		}
-	}
+	
 }// end Nav class 
