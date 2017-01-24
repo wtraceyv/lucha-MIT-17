@@ -16,8 +16,11 @@ public class Gardener extends RootBot{
 	// make method to reset these, and find out when that 
 	// would be appropriate?
 	private static int soldiersDispensed = 0;
-	private static int treesPlanted = 0; 
 	private static int scoutsDispensed = 0; 
+	private static boolean needLumberjacks = false; 
+	private static boolean needScouts = true; 
+	private static int actionSequence = 0; 
+	private static int treesPlanted = 0; 
 	
 	public static void go(){
 		while (true){
@@ -31,6 +34,41 @@ public class Gardener extends RootBot{
 			}
 		}
 	}// end go()
+	
+	/**
+	 * main method to execute other than update() in go() 
+	 * --> keeps try/catch in Gardener loop less cluttered 
+	 * @throws GameActionException
+	 */
+	public static void execute() throws GameActionException {
+		Direction randTest = Nav.randomDirection(); 
+		if (rc.canBuildRobot(RobotType.SCOUT, randTest) && !needLumberjacks){
+			rc.buildRobot(RobotType.SCOUT, randTest);
+			scoutsDispensed++;
+		} 
+		treeGroupPhase();  
+		tryToWaterTrees(); 
+		dispenseBots();
+		buyPoints(); 
+	}
+	
+	/**
+	 * some kind of system to periodically decide to buy victory points...
+	 * cater to new system of changing price 
+	 * --> later in match, I'll probably have a billion bullets to use 
+	 * anyway; try to be efficient about this and not let bullets 
+	 * overflow uselessly 
+	 * @throws GameActionException
+	 */
+	public static void buyPoints() throws GameActionException {
+		if (round < 900 && rc.getTeamBullets() >= victoryPointCost*100){
+			rc.donate(victoryPointCost * 100);
+		} else if (round < 1500 && rc.getTeamBullets() >= victoryPointCost * 50){
+			rc.donate(victoryPointCost * 50); 
+		} else if (rc.getTeamBullets() >= victoryPointCost * 200){
+			rc.donate(victoryPointCost * 200); 
+		}
+	}
 	
 	/**
 	 * how to plant a tree if needed 
@@ -65,44 +103,44 @@ public class Gardener extends RootBot{
 	 * @return
 	 * @throws GameActionException
 	 */
-	public static boolean tryToWaterTrees() throws GameActionException{
-		if (closeTrees.length>0){
-			for(int i=closeTrees.length;i-->0;){
-				if(closeTrees[i].getHealth()<GameConstants.BULLET_TREE_MAX_HEALTH && rc.canWater(closeTrees[i].getID())){
-					rc.water(closeTrees[i].getID());
+	public static void tryToWaterTrees() throws GameActionException{
+		if (rc.canWater()){
+			for(TreeInfo tree : closeTrees){
+				if (rc.canWater(tree.getID()) && tree.getHealth()<GameConstants.BULLET_TREE_MAX_HEALTH-GameConstants.WATER_HEALTH_REGEN_RATE){
+					rc.water(tree.getID());
 				}
 			}
-			return true; 
 		}
-		return false; 
 	}
 	
 	/**
 	 * decide whether to dispense certain bots 
+	 * --> needLumberjacks is alternating between true/false, 
+	 * --> so making of a lumberjack or soldier alternates for a gardener 
+	 * --> at the moment...
 	 * 
 	 * @return boolean whatever 
 	 * @throws GameActionException
 	 */
 	public static boolean dispenseBots() throws GameActionException{
+		Direction newRand = Nav.randomDirection();
+		if (rc.canBuildRobot(RobotType.SCOUT, newRand) && needScouts){
+			rc.buildRobot(RobotType.SCOUT, newRand);
+			scoutsDispensed++;
+			needScouts = false; 
+			return true; 
+		} 
+		if (rc.canBuildRobot(RobotType.SOLDIER, newRand) && !needLumberjacks){
+			rc.buildRobot(RobotType.SOLDIER, newRand);
+			needLumberjacks = true; 
+			needScouts = true; 
+			return true; 
+		} else if (rc.canBuildRobot(RobotType.LUMBERJACK, newRand)) {
+			rc.buildRobot(RobotType.LUMBERJACK, newRand);
+			needLumberjacks = false; 
+			return true; 
+		}
 		return false;
 	}
 	
-	/**
-	 * main method to execute other than update() in go() 
-	 * --> keeps try/catch in Gardener loop less cluttered 
-	 * @throws GameActionException
-	 */
-	public static void execute() throws GameActionException {
-		Direction randTest = Nav.randomDirection(); 
-		if (scoutsDispensed<1&&rc.canBuildRobot(RobotType.SCOUT, randTest)){
-			rc.buildRobot(RobotType.SCOUT, randTest);
-			scoutsDispensed++;
-		}
-		treeGroupPhase();  
-		tryToWaterTrees(); 
-		dispenseBots();
-		if (rc.getTeamBullets()>10000){
-			rc.donate(10000);
-		}
-	}
-}
+}// end Gardener class 
