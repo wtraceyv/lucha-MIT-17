@@ -10,12 +10,8 @@ import battlecode.common.*;
 
 public class Nav extends RootBot {
 	
-    /**
-     * grab a random direction, mostly for testing 
-     * or last resorts. 
-     */
-    static Direction randomDirection() {
-    	return new Direction((float)Math.random() * 2 * (float)Math.PI);
+	static Direction randomDirection() {
+        return new Direction((float)Math.random() * 2 * (float)Math.PI);
     }
 	/**
      * Attempts to move in a given direction, while avoiding small obstacles directly in the path.
@@ -107,6 +103,16 @@ public class Nav extends RootBot {
 				if (distance <= GameConstants.LUMBERJACK_STRIKE_RADIUS && Nav.tryMove(retreatDir, 45, 3)){
 					return true;  
 				}
+			}
+		}
+		return false; 
+	}
+	
+	public static boolean goToArchon() throws GameActionException {
+		for (MapLocation possibleStorm : broadcastedEnemyArchons){
+			if (possibleStorm!=null && possibleStorm!=(new MapLocation(0.0f,0.0f))){
+				Nav.goTo(possibleStorm); 
+				return true; 
 			}
 		}
 		return false; 
