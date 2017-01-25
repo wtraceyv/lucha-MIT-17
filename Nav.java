@@ -117,5 +117,18 @@ public class Nav extends RootBot {
 		}
 		return false; 
 	}
+	public static Direction screensaver(Direction moving) throws GameActionException{
+        if(rc.canMove(moving)){
+            rc.move(moving);
+            return moving;
+        }
+        else return moving.rotateLeftDegrees(90);
+    }
+    public static void goAway(RobotType from) throws GameActionException{
+        if(findFriendlyBot(from) != null){
+            Direction away = findFriendlyBot(from).getLocation().directionTo(here);
+            Nav.tryMove(away);
+        }
+    }
 	
 }// end Nav class 
