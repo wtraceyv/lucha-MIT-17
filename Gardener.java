@@ -15,12 +15,11 @@ public class Gardener extends RootBot{
 	
 	// make method to reset these, and find out when that 
 	// would be appropriate?
+	private static int treesPlanted = 0; 
 	private static int soldiersDispensed = 0;
 	private static int scoutsDispensed = 0; 
 	private static boolean needLumberjacks = false; 
 	private static boolean needScouts = true; 
-	private static int actionSequence = 0; 
-	private static int treesPlanted = 0; 
 	
 	public static void go(){
 		while (true){
@@ -41,15 +40,10 @@ public class Gardener extends RootBot{
 	 * @throws GameActionException
 	 */
 	public static void execute() throws GameActionException {
-    	    if(findFriendlyBot(RobotType.ARCHON) != null) {
-          	  Nav.goAway(RobotType.ARCHON);
-        	}
-      	  else {
-            treeGroupPhase();
-            tryToWaterTrees();
-            dispenseBots();
-            buyPoints();
-      	  }
+		treeGroupPhase();  
+		tryToWaterTrees(); 
+		dispenseBots();
+		buyPoints(); 
 	}
 	
 	/**
@@ -61,12 +55,12 @@ public class Gardener extends RootBot{
 	 * @throws GameActionException
 	 */
 	public static void buyPoints() throws GameActionException {
-		if (round < 900 && rc.getTeamBullets() >= victoryPointCost*100){
-			rc.donate(victoryPointCost * 100);
-		} else if (round < 1500 && rc.getTeamBullets() >= victoryPointCost * 50){
-			rc.donate(victoryPointCost * 50); 
-		} else if (rc.getTeamBullets() >= victoryPointCost * 200){
-			rc.donate(victoryPointCost * 200); 
+		if (round > 300 && rc.getTeamBullets() >= victoryPointCost*50){
+			rc.donate(victoryPointCost * 50);
+		} else if (round > 800 && rc.getTeamBullets() >= victoryPointCost * 25){
+			rc.donate(victoryPointCost * 25); 
+		} else if (rc.getTeamBullets() >= victoryPointCost * 10){
+			rc.donate(victoryPointCost * 10); 
 		}
 	}
 	
@@ -78,23 +72,22 @@ public class Gardener extends RootBot{
 	 */
 	public static void treeGroupPhase() throws GameActionException {
 		// setup directions to plant trees in 
-		Direction negativeDir = here.directionTo(centerInitEnemyArchons);
-		Direction[] plantingDirs = new Direction[7]; 
-		float offset = (float) 45; 
-		for (int i=7, j=0;i-->0;){
-			plantingDirs[j] = negativeDir.rotateLeftDegrees(offset); 
-			offset += 45; 
-			j++; 
-		}
-		// plant the trees
-		for (Direction d : plantingDirs){
-			if (rc.canPlantTree(d)){
-				rc.plantTree(d);
-				treesPlanted++; 
+		Direction away = centerInitEnemyArchons.directionTo(here); 
+		Direction[] initPlantingDirs = new Direction[] {Direction.getNorth(),Direction.getWest(),Direction.getSouth()}; 
+		Direction[] secondPhasePlantingDirs = new Direction[] {}; 
+		
+		// plant the trees first three trees 
+		if (treesPlanted < 3){
+			for (Direction d : initPlantingDirs){
+				if (rc.canPlantTree(d)){
+					rc.plantTree(d);
+					treesPlanted++; 
+				}
+				else 
+					continue; 
 			}
-			else 
-				continue; 
 		}
+		// planting more in moving formation? (testing only) 	
 	}
 	
 	/**
@@ -124,16 +117,9 @@ public class Gardener extends RootBot{
 	 */
 	public static boolean dispenseBots() throws GameActionException{
 		Direction newRand = Nav.randomDirection();
-		Direction randTest = Nav.randomDirection(); 
-		if (rc.canBuildRobot(RobotType.SCOUT, randTest) && !needLumberjacks){
-			rc.buildRobot(RobotType.SCOUT, randTest);
-			scoutsDispensed++;
-		} 
-		if (rc.canBuildRobot(RobotType.SCOUT, newRand) && needScouts){
+		if (rc.canBuildRobot(RobotType.SCOUT, newRand) && !needLumberjacks && scoutsDispensed<1){
 			rc.buildRobot(RobotType.SCOUT, newRand);
 			scoutsDispensed++;
-			needScouts = false; 
-			return true; 
 		} 
 		if (rc.canBuildRobot(RobotType.SOLDIER, newRand) && !needLumberjacks){
 			rc.buildRobot(RobotType.SOLDIER, newRand);
