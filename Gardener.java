@@ -40,10 +40,16 @@ public class Gardener extends RootBot{
 	 * @throws GameActionException
 	 */
 	public static void execute() throws GameActionException {
-		treeGroupPhase();  
-		tryToWaterTrees(); 
-		dispenseBots();
-		buyPoints(); 
+		if (findFriendlyBot(RobotType.ARCHON) != null){
+			Nav.goAway(RobotType.ARCHON); 
+		}
+		
+		else {
+			treeGroupPhase();  
+			tryToWaterTrees(); 
+			dispenseBots();
+			buyPoints(); 
+		}
 	}
 	
 	/**
