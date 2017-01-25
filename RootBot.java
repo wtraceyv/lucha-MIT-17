@@ -53,6 +53,12 @@ public class RootBot {
 		}
 		return null;
 	}
-	
+	public static RobotInfo findFriendlyBot(RobotType type){
+        for (int i = closeAllies.length; i-->0;){
+            if (closeAllies[i].getType()==type)
+                return closeAllies[i];
+        }
+        return null;
+    }
 	
 }// end class RootBot
