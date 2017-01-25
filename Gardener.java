@@ -41,15 +41,15 @@ public class Gardener extends RootBot{
 	 * @throws GameActionException
 	 */
 	public static void execute() throws GameActionException {
-		Direction randTest = Nav.randomDirection(); 
-		if (rc.canBuildRobot(RobotType.SCOUT, randTest) && !needLumberjacks){
-			rc.buildRobot(RobotType.SCOUT, randTest);
-			scoutsDispensed++;
-		} 
-		treeGroupPhase();  
-		tryToWaterTrees(); 
-		dispenseBots();
-		buyPoints(); 
+    	    if(findFriendlyBot(RobotType.ARCHON) != null) {
+          	  Nav.goAway(RobotType.ARCHON);
+        	}
+      	  else {
+            treeGroupPhase();
+            tryToWaterTrees();
+            dispenseBots();
+            buyPoints();
+      	  }
 	}
 	
 	/**
@@ -124,6 +124,11 @@ public class Gardener extends RootBot{
 	 */
 	public static boolean dispenseBots() throws GameActionException{
 		Direction newRand = Nav.randomDirection();
+		Direction randTest = Nav.randomDirection(); 
+		if (rc.canBuildRobot(RobotType.SCOUT, randTest) && !needLumberjacks){
+			rc.buildRobot(RobotType.SCOUT, randTest);
+			scoutsDispensed++;
+		} 
 		if (rc.canBuildRobot(RobotType.SCOUT, newRand) && needScouts){
 			rc.buildRobot(RobotType.SCOUT, newRand);
 			scoutsDispensed++;
