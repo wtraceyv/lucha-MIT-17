@@ -22,4 +22,15 @@ public class MapMath {
 				(int)Math.round(f * center.y)); 
 		return center; 
 	}
-}
+	
+	/**
+	 * checks whether floats are close enough to be considered 'equal' 
+	 * @param x
+	 * @param y
+	 * @return true if 'equal' 
+	 */
+	public static boolean floatEquals(float x, float y){
+		return Math.abs(x - y) <= .001; 
+	}
+	
+}// end MapMath class 
