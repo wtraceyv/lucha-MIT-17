@@ -10,6 +10,8 @@ import battlecode.common.*;
 
 public class Nav extends RootBot {
 	
+	static Direction randomDir = randomDirection(); 
+	
 	static Direction randomDirection() {
         return new Direction((float)Math.random() * 2 * (float)Math.PI);
     }
@@ -74,15 +76,14 @@ public class Nav extends RootBot {
 		if (here.isWithinDistance(target, me.sensorRadius))
 			return false; 
 		Direction forward = here.directionTo(target);
-		return tryMove(forward, 45, 3); 
+		return tryMove(forward, 60, 3); 
 	}
 	
-	/**
-	 * basic dodge-a-bullet deal 
-	 * @return false if failed dodge
-	 */
-	public static boolean dodge(){
-		return false; 
+	public static boolean goTo(MapLocation target, float goalRadius) throws GameActionException {
+		if (here.isWithinDistance(target, goalRadius))
+			return false;
+		Direction forward = here.directionTo(target); 
+		return tryMove(forward, 70, 3); 
 	}
 	
 	/**
@@ -108,15 +109,58 @@ public class Nav extends RootBot {
 		return false; 
 	}
 	
+	/**
+	 * testing now 
+	 * @return
+	 * @throws GameActionException
+	 */
 	public static boolean goToArchon() throws GameActionException {
 		for (MapLocation possibleStorm : broadcastedEnemyArchons){
-			if (possibleStorm!=null && possibleStorm!=(new MapLocation(0.0f,0.0f))){
-				Nav.goTo(possibleStorm); 
+			if (possibleStorm!=null && !MapMath.floatEquals(possibleStorm.x, 0) 
+					                && !MapMath.floatEquals(possibleStorm.x, 0) 
+					                && Nav.goTo(possibleStorm)){
 				return true; 
 			}
 		}
 		return false; 
 	}
+	
+	/** dodging and inactive screensavers() here */ 
+	
+	public static boolean dodge() throws GameActionException {
+		return false; 
+	}
+	
+	public static boolean sideDodge(BulletInfo bullet) throws GameActionException {
+		Direction danger = bullet.dir;  
+		return (tryMove(danger.rotateLeftDegrees(90),10,2)
+			  ||tryMove(danger.rotateRightDegrees(90),10,2)); 
+	}
+	
+	public static boolean circleDodge(BulletInfo bullet) throws GameActionException {
+		return false; 
+	}
+	
+	/**
+	 * @param bullet
+	 * @return whether said bullet is dangerous or not 
+	 */
+	public static boolean bulletIsDangerous(BulletInfo bullet){
+		Direction danger = bullet.location.directionTo(here); 
+		float gap = here.distanceTo(bullet.getLocation()); 
+		float theta = danger.radiansBetween(bullet.dir); 
+		if (Math.abs(theta)>Math.PI/2)
+			return false; 
+		float sideDist = (float) Math.abs(gap * Math.sin(theta)); 
+		return (sideDist <= me.bodyRadius); 
+	}// bulletIsDangerous end 
+	
+	/**
+	 * Noah's ... weird implementation .. eee
+	 * @param moving
+	 * @return
+	 * @throws GameActionException
+	 */
 	public static Direction screensaver(Direction moving) throws GameActionException{
         if(rc.canMove(moving)){
             rc.move(moving);
@@ -124,6 +168,30 @@ public class Nav extends RootBot {
         }
         else return moving.rotateLeftDegrees(90);
     }
+	
+	/**
+	 * mine, but not sure if operational 
+	 * @throws GameActionException
+	 */
+	public static boolean screensaver() throws GameActionException {
+		if (tryMove(randomDir)){
+			return true; 
+		} else {
+			try{
+			randomDir = randomDirection(); 
+			screensaver(); 
+			} catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+		return false; 
+	}
+	
+	/**
+	 * will try soon 
+	 * @param from
+	 * @throws GameActionException
+	 */
     public static void goAway(RobotType from) throws GameActionException{
         if(findFriendlyBot(from) != null){
             Direction away = findFriendlyBot(from).getLocation().directionTo(here);
