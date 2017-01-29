@@ -17,7 +17,7 @@ public class RobotPlayer {
     public static void run(RobotController rc) throws GameActionException {
 
         RobotPlayer.rc = rc;
-        // runs corresponding file for robot type
+        
         switch (rc.getType()) {
             case ARCHON:
                 ArchonBot.go();  
@@ -32,7 +32,11 @@ public class RobotPlayer {
             	ScoutBot.go();
             	break; 
             case LUMBERJACK:
+            	Lumberjack.go(); 
                 break;
+            case TANK: 
+            	TankBot.go();
+            	break; 
             default: 
             	System.out.println("Bad robot type");
             	break; 
