@@ -10,12 +10,11 @@ import battlecode.common.*;
  *
  */
 
-public class ScoutBot extends RootBot{
-
-	static boolean firstStrikeMade = false;
+public class ScoutBot extends RootBot{ 
+	
+	static Direction previous = Nav.randomDirection(); 
 
 	public static void go() throws GameActionException{
-		update();
 		while (true){
 			try{
 				update();
@@ -35,10 +34,23 @@ public class ScoutBot extends RootBot{
 	 * @throws GameActionException
 	 */
 	public static void execute() throws GameActionException {
-		if (!idleAttacks()){
-			Nav.goTo(centerInitEnemyArchons);
+		if (findBot(RobotType.ARCHON)!=null){
+			RobotInfo arc = findBot(RobotType.ARCHON); 
+			Comms.screamArchon(arc, arc.getLocation());
+			// shouldn't need to return yet 
 		}
-	}
+		if (idleAttacks())
+			return; 
+		if (Nav.avoidLumberjack())
+			return; 
+		if (Nav.goToArchon()){
+			return;
+		}
+		if (Nav.goTo(centerInitEnemyArchons))
+			return; 
+//		if (Nav.screensaver())
+//			return; 
+	}// end execute() 
 
 	/**
 	 * no specific job is needed; find a bot to bother
@@ -52,39 +64,23 @@ public class ScoutBot extends RootBot{
 			swarm(target);
 			return true;
 		}
-		else if (findBot(RobotType.LUMBERJACK)!=null){
-			target = findBot(RobotType.LUMBERJACK);
-			swarm(target);
-			return true;
-		}
+//		else if (findBot(RobotType.LUMBERJACK)!=null){
+//			target = findBot(RobotType.LUMBERJACK);
+//			swarm(target);
+//			return true;
+//		}
 		else if (findBot(RobotType.SOLDIER)!=null){
 			target = findBot(RobotType.SOLDIER);
 			swarm(target);
 			return true;
 		}
-		else if (findBot(RobotType.ARCHON)!=null && findBot(RobotType.SOLDIER)==null){
-			target = findBot(RobotType.ARCHON);
-			swarm(target);
-			return true;
-		}
+//		else if (findBot(RobotType.ARCHON)!=null && findBot(RobotType.SOLDIER)==null){
+//			target = findBot(RobotType.ARCHON);
+//			swarm(target);
+//			return true;
+//		}
 		return false;
-	}
-
-	/**
-	 * might move to RootBot or something?
-	 *
-	 * find and return specified type of robot so we can annoy it
-	 * or run away accordingly
-	 * @param type of robot needed to be found
-	 * @return the last robot in the list of nearby bots of that type found
-	 */
-	public static RobotInfo findBot(RobotType type){
-		for (int i = closeEnemies.length; i-->0;){
-			if (closeEnemies[i].getType()==type)
-				return closeEnemies[i];
-		}
-		return null;
-	}
+	}// end idleAttacks() 
 
 	/**
 	 * just sit and fire at specified enemy while you can,
@@ -97,7 +93,7 @@ public class ScoutBot extends RootBot{
 		if (rc.canFireSingleShot()){
 			rc.fireSingleShot(target);
 		}
-		Nav.goTo(enemy.getLocation());
+		Nav.goTo(enemy.getLocation(), me.sensorRadius*.7f); 
 	}
-
-}// end ScoutBot class 
+	
+}// end ScoutBot class
