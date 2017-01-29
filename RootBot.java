@@ -14,9 +14,8 @@ public class RootBot {
 	public static RobotController rc = RobotPlayer.rc; 
 	public static RobotType me = rc.getType(); 
 	public static MapLocation here = rc.getLocation(); 
-	public static Direction facing; // probably not *super* useful?
 	public static int round = rc.getRoundNum(); 
-	public static float victoryPointCost = 7.5f + round*12.5f/3000; 
+	public static float victoryPointCost = 7.5f + (round*12.5f)/3000; 
 	
 	public static Team allies = rc.getTeam(); 
 	public static Team enemies = allies.opponent(); 
@@ -30,6 +29,7 @@ public class RootBot {
 	public static RobotInfo[] closeEnemies = rc.senseNearbyRobots(me.sensorRadius,enemies); 
 	public static RobotInfo[] urgentEnemies = rc.senseNearbyRobots(me.sensorRadius/2,enemies);
 	public static TreeInfo[] closeTrees = rc.senseNearbyTrees(); 
+	public static BulletInfo[] bullets = rc.senseNearbyBullets(); 
 	
 	public static void update() throws GameActionException {
 		here = rc.getLocation();
@@ -38,6 +38,7 @@ public class RootBot {
 		closeAllies = rc.senseNearbyRobots(me.sensorRadius,allies);
 		closeEnemies = rc.senseNearbyRobots(me.sensorRadius,enemies);
 		closeTrees = rc.senseNearbyTrees();
+		bullets = rc.senseNearbyBullets(); 
 	}
 	
 	/**
@@ -47,18 +48,19 @@ public class RootBot {
 	 * @return the last robot in the list of nearby bots of that type found
 	 */
 	public static RobotInfo findBot(RobotType type){
-		for (int i = closeEnemies.length; i-->0;){
+		for (int i = 0; i < closeEnemies.length; i++){
 			if (closeEnemies[i].getType()==type)
 				return closeEnemies[i];
 		}
 		return null;
 	}
+	
 	public static RobotInfo findFriendlyBot(RobotType type){
         for (int i = closeAllies.length; i-->0;){
             if (closeAllies[i].getType()==type)
                 return closeAllies[i];
         }
         return null;
-    }
+	}
 	
 }// end class RootBot
