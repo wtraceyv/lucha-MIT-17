@@ -20,14 +20,14 @@ public class Lumberjack extends RootBot{
 	public static void execute() throws GameActionException {
 		if (tryAttack())
 			return; 
-//		if (Nav.goToArchon()){
-//			return;
-//		}
-		if (Nav.goTo(centerInitEnemyArchons) && !tryChopTrees())
-			return; 
-		if (closeTrees.length>0 && tryChopTrees()){
+		if (tryChopTrees()){
 			return; 
 		}
+		if (Nav.goToArchon()){
+			return;
+		}
+		if (Nav.goTo(centerInitEnemyArchons))
+			return; 
 	}
 	
 	/**
@@ -37,13 +37,11 @@ public class Lumberjack extends RootBot{
 	 */
 	public static boolean tryAttack() throws GameActionException {
 		for (RobotInfo bot : closeEnemies){
-			if (here.distanceTo(bot.getLocation())>GameConstants.LUMBERJACK_STRIKE_RADIUS){
-				Nav.goTo(bot.getLocation());
-			}
-			if (rc.canStrike()){
+			if (rc.canStrike() && closeAllies.length==0){
 				rc.strike();
 				return true; 
 			}
+			Nav.tryMove(here.directionTo(bot.getLocation()));
 		}
 		return false; 
 	}
@@ -54,12 +52,11 @@ public class Lumberjack extends RootBot{
 	 * @throws GameActionException
 	 */
 	public static boolean tryChopTrees() throws GameActionException {
+		if (closeTrees.length==0)
+			return false; 
 		for (TreeInfo tree : closeTrees){
-			if (rc.canChop(tree.getID())){
+			if (tree.getTeam()!=allies && rc.canChop(tree.getID())){
 				rc.chop(tree.getID());
-				return true; 
-			} else {
-				Nav.goTo(tree.getLocation()); 
 				return true; 
 			}
 		}
